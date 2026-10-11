@@ -5,9 +5,9 @@ package:
   name: ratty
   version: ${{ version }}
 
+# Built from this fork's own tree, which tracks upstream tag v${{ version }}.
 source:
-  url: https://github.com/orhun/ratty/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: b3e03aaaff81d68730d67392a135ac3fdfdf022880c66632ab188d2fe084cda3
+  path: .
 
 build:
   number: 0
