@@ -1,0 +1,92 @@
+context:
+  version: "0.6.0"
+
+package:
+  name: ratty
+  version: ${{ version }}
+
+source:
+  url: https://github.com/orhun/ratty/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: b3e03aaaff81d68730d67392a135ac3fdfdf022880c66632ab188d2fe084cda3
+
+build:
+  number: 0
+  skip:
+    - not linux
+  script:
+    - cargo install --locked --no-track --root "$PREFIX" --path . --bins
+    - mkdir -p "$PREFIX/share/ratty" "$PREFIX/share/icons/hicolor/512x512/apps" "$PREFIX/Menu"
+    - cp -r assets/objects "$PREFIX/share/ratty/"
+    - cp config/ratty.toml "$PREFIX/share/ratty/ratty.toml"
+    - cp website/assets/images/ratty-logo.png "$PREFIX/share/icons/hicolor/512x512/apps/ratty.png"
+    - cp website/assets/images/ratty-logo.png "$PREFIX/Menu/ratty.png"
+    - |
+      cat > "$PREFIX/Menu/ratty_menu.json" <<'MENU'
+      {
+        "$schema": "https://schemas.conda.org/menuinst/menuinst-1-1-0.schema.json",
+        "menu_name": "Ratty",
+        "menu_items": [
+          {
+            "name": "Ratty",
+            "description": "GPU-rendered terminal emulator with inline 3D graphics",
+            "icon": "{{ MENU_DIR }}/ratty.{{ ICON_EXT }}",
+            "activate": false,
+            "command": [""],
+            "platforms": {
+              "linux": {
+                "command": ["{{ PREFIX }}/bin/ratty"],
+                "Categories": ["System", "TerminalEmulator", "Utility"],
+                "StartupWMClass": "ratty"
+              }
+            }
+          }
+        ]
+      }
+      MENU
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('rust') }}
+    - pkg-config
+  host:
+    - libxkbcommon
+    - wayland
+    - libudev
+    - xorg-libx11
+    - xorg-libxcursor
+    - xorg-libxi
+    - xorg-libxrandr
+    - xorg-libxext
+    - libxcb
+    - fontconfig
+    - freetype
+    - expat
+  run:
+    - libxkbcommon
+    - wayland
+    - xorg-libx11
+    - xorg-libxcursor
+    - xorg-libxi
+    - xorg-libxrandr
+    - xorg-libxext
+    - libxcb
+    - fontconfig
+    - libvulkan-loader
+    - menuinst
+
+tests:
+  - script:
+      - ratty --version
+      - test -f $PREFIX/bin/ratty-mcp
+
+about:
+  homepage: https://github.com/orhun/ratty
+  repository: https://github.com/orhun/ratty
+  license: MIT
+  license_file: LICENSE
+  summary: A GPU-rendered terminal emulator that supports inline 3D graphics
+
+extra:
+  recipe-maintainers:
+    - nandi-conda
